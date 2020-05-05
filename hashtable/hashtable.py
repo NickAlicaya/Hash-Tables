@@ -46,8 +46,7 @@ class HashTable:
             hash_ = (hash_*33) + ord(k)
             hash_ &= 0xffffffff
         return hash_    
-
-
+    
     def hash_index(self, key):
         """
         Take an arbitrary key and return a valid integer index
@@ -63,12 +62,26 @@ class HashTable:
         Hash collisions should be handled with Linked List Chaining.
 
         Implement this.
+        Modify this to handle chaining for collision Resolution
+        STEPS:
+            Put()
+            Find the hash index
+            Search the list for the key
+            If it's there, replace the value
+            If it's not, append a new record to the list
         """
         if self.size == self.capacity:
             return
+
         index = self.hash_index(key)
-        self.storage[index] = (key,value)
-        self.size += 1
+        # self.storage[index] = (key,value)
+        # self.size += 1
+        cur = self.storage[index]
+        cur = head
+        while cur is not None and cur.key is not key:
+            last = cur
+            cur = last.next
+
 
     def delete(self, key):
         """
@@ -77,6 +90,13 @@ class HashTable:
         Print a warning if the key is not found.
 
         Implement this.
+        Modify this to handle chaining for collision Resolution
+        STEPS:
+            Delete()
+            Find the hash index
+            Search the list for the key
+            If found, delete the node from the list, (return the node or value?)
+            Else return None
         """
         if self.size > 0:
             index = self.hash_index(key)
@@ -92,6 +112,13 @@ class HashTable:
         Returns None if the key is not found.
 
         Implement this.
+        Modify this to handle chaining for collision Resolution
+        STEPS:
+            Get()
+            Find the hash index
+            Search the list for the key
+            If found, return the value
+            Else return None
         """
         index = self.hash_index(key)
         if self.storage[index] != None:
