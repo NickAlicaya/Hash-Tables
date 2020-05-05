@@ -16,6 +16,11 @@ class HashTable:
 
     Implement this.
     """
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.storage = [None] * capacity
+        self.size = 0
+        
 
     def fnv1(self, key):
         """
@@ -23,20 +28,32 @@ class HashTable:
 
         Implement this, and/or DJB2.
         """
-
+        hash_ = 14695981039346656037
+        for k in key:
+            hash_ = hash_ ^ ord(k)
+            hash_ = hash_ * 1099511628211
+            hash_ &= 0xffffffffffffffff 
+        return hash_    
+    
     def djb2(self, key):
         """
         DJB2 32-bit hash function
 
         Implement this, and/or FNV-1.
         """
+        hash_ = 5381
+        for k in key:
+            hash_ = (hash_*33) + ord(k)
+            hash_ &= 0xffffffff
+        return hash_    
+
 
     def hash_index(self, key):
         """
         Take an arbitrary key and return a valid integer index
         between within the storage capacity of the hash table.
         """
-        #return self.fnv1(key) % self.capacity
+        # return self.fnv1(key) % self.capacity
         return self.djb2(key) % self.capacity
 
     def put(self, key, value):
@@ -47,6 +64,11 @@ class HashTable:
 
         Implement this.
         """
+        if self.size == self.capacity:
+            return
+        index = self.hash_index(key)
+        self.storage[index] = (key,value)
+        self.size += 1
 
     def delete(self, key):
         """
@@ -56,6 +78,12 @@ class HashTable:
 
         Implement this.
         """
+        if self.size > 0:
+            index = self.hash_index(key)
+            self.storage[index] = None
+            self.size -=1
+        else:
+            return    
 
     def get(self, key):
         """
@@ -65,6 +93,11 @@ class HashTable:
 
         Implement this.
         """
+        index = self.hash_index(key)
+        if self.storage[index] != None:
+            return self.storage[index][1]
+        else:   
+            return None    
 
     def resize(self):
         """
@@ -73,6 +106,15 @@ class HashTable:
 
         Implement this.
         """
+        self.capacity *= 2
+        new_storage = [None]*self.capacity
+        for value in self.storage:
+            if value != None:
+                hashed_key=self.hash_index(value[0])
+                new_storage[hashed_key] = value
+        self.storage = new_storage
+      
+                
 
 if __name__ == "__main__":
     ht = HashTable(2)
