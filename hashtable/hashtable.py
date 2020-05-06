@@ -7,6 +7,7 @@ class HashTableEntry:
         self.key = key
         self.value = value
         self.next = None
+        self.head = None
       
 class HashTable:
     """
@@ -18,7 +19,8 @@ class HashTable:
     def __init__(self, capacity):
         self.capacity = capacity
         self.storage = [None] * capacity
-        self.head = None
+       
+        
 
     
     def fnv1(self, key):
@@ -70,16 +72,35 @@ class HashTable:
             If it's there, replace the value
             If it's not, append a new record to the list
         """
+        # index = self.hash_index(key)
+        # node = self.storage[index]
+        # new_node = HashTableEntry(key, value)
+        # if node:
+        #     node = value
+        # else:
+        #        new_node.next = self.head
+        #        self.head = new_node  
+        # return new_node
+
         index = self.hash_index(key)
-        node = self.storage[index]
-        new_node = HashTableEntry(key, value)
-        if node:
-            node = value
-        else:
-               new_node.next = self.head
-               self.head = new_node  
-        return new_node
-    
+        current = self.storage[index]
+        
+        if current is None:
+            self.storage[index] = HashTableEntry(key, value)
+            return
+        if current.key == key:
+            current.value = value
+            return    
+        while current.key != key:
+            if current.next is None:
+                current.next = HashTableEntry(key, value)
+                return
+            current = current.next
+            if current.key == key:
+                current.value = value  
+                return
+
+
     def delete(self, key):
         """
         Remove the value stored with the given key.
@@ -95,13 +116,41 @@ class HashTable:
             If found, delete the node from the list, (return the node or value?)
             Else return None
         """
-        # index = self.hash_index(key)
-        current = self.head
-        while current:
+        # current = self.head
+        # while current:
+        #     if current.key == key:
+        #         current.key = None
+        #     current = current.next
+        # return None    
+
+        index = self.hash_index(key)
+        current = self.storage[index]
+
+
+        if current is None:
+            return None
+
+        if current.next is None:
             if current.key == key:
-                current.key = None
+                deleted_val = current.value
+                self.storage[index] = None
+                return deleted_val
+            else:
+                return None    
+
+        prev = None
+
+        while current:
+              
+            if current.key == key:
+                deleted_val = current.value
+                
+                prev.next = current.next
+                return deleted_val
+            prev = current    
             current = current.next
         return None    
+
 
 
     def get(self, key):
@@ -119,12 +168,24 @@ class HashTable:
             If found, return the value
             Else return None
         """
-        current = self.head
-        while current:
-            if current.key == key:
-                return current.value
-            current = current.next    
-        return None
+        # current = self.head
+        # while current:
+        #     if current.key == key:
+        #         return current.value
+        #     current = current.next    
+        # return None
+
+        index = self.hash_index(key)
+        current = self.storage[index]
+        if current is None:
+            return None
+        while current.key !=key:
+            if current.next is None:
+                return None
+            current = current.next
+        return current.value
+
+
 
     def resize(self,new_capacity):
         """
