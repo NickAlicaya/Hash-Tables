@@ -19,6 +19,7 @@ class HashTable:
     def __init__(self, capacity):
         self.capacity = capacity
         self.storage = [None] * capacity
+        self.size = 0
        
         
 
@@ -87,6 +88,12 @@ class HashTable:
         
         if current is None:
             self.storage[index] = HashTableEntry(key, value)
+            self.size += 1
+            load_factor = self.size/len(self.storage) 
+            print('xxxLOADxxx',load_factor)
+            if load_factor > 0.7:
+                self.resize(2)
+                print('xxxLOADxxx',load_factor)   
             return
         if current.key == key:
             current.value = value
@@ -94,6 +101,12 @@ class HashTable:
         while current.key != key:
             if current.next is None:
                 current.next = HashTableEntry(key, value)
+                self.size += 1
+                load_factor = self.size/len(self.storage) 
+                print('xxxLOADxxx',load_factor)
+                if load_factor > 0.7:
+                    self.resize(2)
+                    print('xxxLOADxxx',load_factor)
                 return
             current = current.next
             if current.key == key:
@@ -134,6 +147,7 @@ class HashTable:
             if current.key == key:
                 deleted_val = current.value
                 self.storage[index] = None
+                self.size -= 1
                 return deleted_val
             else:
                 return None    
@@ -144,7 +158,7 @@ class HashTable:
               
             if current.key == key:
                 deleted_val = current.value
-                
+                self.size -= 1
                 prev.next = current.next
                 return deleted_val
             prev = current    
@@ -194,15 +208,16 @@ class HashTable:
 
         Implement this.
         """
-        new_capacity = self.capacity
-        new_storage = [None]*new_capacity
-        for value in self.storage:
-            if value != None:
-                hashed_key=self.hash_index(value[0])
-                new_storage[hashed_key] = value
-        self.storage = new_storage
-      
-                
+        self.capacity = self.capacity*new_capacity
+        new_storage = [None]*self.capacity
+        for node in self.storage:
+            if node != None:
+                hashed_key=self.hash_index(node.key)
+                new_storage[hashed_key] = node
+            self.storage = new_storage    
+        
+     
+              
 
 if __name__ == "__main__":
     ht = HashTable(2)
