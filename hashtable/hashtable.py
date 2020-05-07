@@ -21,6 +21,7 @@ class HashTable:
         self.capacity = capacity
         self.storage = [None] * capacity
         self.size = 0
+      
     
     def fnv1(self, key):
         """
@@ -78,20 +79,18 @@ class HashTable:
             self.storage[index] = HashTableEntry(key, value)
             self.size += 1
             load_factor = self.size/self.capacity 
-            if load_factor > 0.7:
-                self.resize(self.capacity*2)  
-            return
             
+            if load_factor > 0.7:
+                self.resize(self.capacity*2)
+            return
         if current.key == key:
             current.value = value
-            return   
-
+            return    
         while current.key != key:
             if current.next is None:
                 current.next = HashTableEntry(key, value)
                 self.size += 1
                 load_factor = self.size/self.capacity 
-
                 if load_factor > 0.7:
                     self.resize(self.capacity*2)
                 return
@@ -132,13 +131,14 @@ class HashTable:
                 if load_factor < 0.2 and self.capacity > 8:
                     half = load_factor//2
                     self.resize(half)
-                    return deleted_val
+                return deleted_val
             else:
                 return None    
 
         prev = None
 
         while current:
+              
             if current.key == key:
                 deleted_val = current.value
                 self.size -= 1
