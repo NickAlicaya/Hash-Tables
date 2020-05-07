@@ -1,4 +1,3 @@
-import math
 class HashTableEntry:
     """
     Hash Table entry, as a linked list node.
@@ -17,14 +16,11 @@ class HashTable:
 
     Implement this.
     """
-    def __init__(self, capacity, min_capacity=None):
+   
+    def __init__(self, capacity):
         self.capacity = capacity
         self.storage = [None] * capacity
         self.size = 0
-        self.min_capacity = min_capacity if min_capacity else 8
-       
-        
-
     
     def fnv1(self, key):
         """
@@ -75,16 +71,6 @@ class HashTable:
             If it's there, replace the value
             If it's not, append a new record to the list
         """
-        # index = self.hash_index(key)
-        # node = self.storage[index]
-        # new_node = HashTableEntry(key, value)
-        # if node:
-        #     node = value
-        # else:
-        #        new_node.next = self.head
-        #        self.head = new_node  
-        # return new_node
-
         index = self.hash_index(key)
         current = self.storage[index]
         
@@ -92,23 +78,22 @@ class HashTable:
             self.storage[index] = HashTableEntry(key, value)
             self.size += 1
             load_factor = self.size/self.capacity 
-            # print('xxxLOADxxx',load_factor)
             if load_factor > 0.7:
-                self.resize(self.capacity*2)
-                # print('xxxLOADxxx',load_factor)   
+                self.resize(self.capacity*2)  
             return
+            
         if current.key == key:
             current.value = value
-            return    
+            return   
+
         while current.key != key:
             if current.next is None:
                 current.next = HashTableEntry(key, value)
                 self.size += 1
                 load_factor = self.size/self.capacity 
-                # print('xxxLOADxxx',load_factor)
+
                 if load_factor > 0.7:
                     self.resize(self.capacity*2)
-                    # print('xxxLOADxxx',load_factor)
                 return
             current = current.next
             if current.key == key:
@@ -131,13 +116,6 @@ class HashTable:
             If found, delete the node from the list, (return the node or value?)
             Else return None
         """
-        # current = self.head
-        # while current:
-        #     if current.key == key:
-        #         current.key = None
-        #     current = current.next
-        # return None    
-
         index = self.hash_index(key)
         current = self.storage[index]
 
@@ -150,32 +128,27 @@ class HashTable:
                 self.storage[index] = None
                 self.size -= 1
                 load_factor = self.size/self.capacity
-                print('xxxLOADxxx',load_factor)
+               
                 if load_factor < 0.2 and self.capacity > 8:
                     half = load_factor//2
-                    print('xxxHALFxxx',half)
                     self.resize(half)
-                    print('xxxLOADxxx',load_factor)   
-                return deleted_val
+                    return deleted_val
             else:
                 return None    
 
         prev = None
 
         while current:
-              
             if current.key == key:
                 deleted_val = current.value
                 self.size -= 1
                 current.key = None
                 prev.next = current.next
                 load_factor = self.size/self.capacity
-                print('xxxLOADxxx',load_factor)
+               
                 if load_factor < 0.2 and self.capacity > 8:
-                    half = math.ceil(load_factor//2)
-                    print('xxxHALFxxx',half)
-                    self.resize(half)
-                    print('xxxLOADxxx',load_factor) 
+                    half = load_factor//2
+                    self.resize(load_factor//2)
                 return deleted_val
             prev = current    
             current = current.next
@@ -198,13 +171,6 @@ class HashTable:
             If found, return the value
             Else return None
         """
-        # current = self.head
-        # while current:
-        #     if current.key == key:
-        #         return current.value
-        #     current = current.next    
-        # return None
-
         index = self.hash_index(key)
         current = self.storage[index]
         if current is None:
@@ -214,9 +180,6 @@ class HashTable:
                 return None
             current = current.next
         return current.value
-
-
-
 
     def resize(self,new_capacity):
         """
@@ -233,9 +196,7 @@ class HashTable:
                 hashed_key=self.hash_index(node.key)
                 new_storage[hashed_key] = node
             self.storage = new_storage    
-        
-     
-              
+         
 
 if __name__ == "__main__":
     ht = HashTable(2)
