@@ -1,3 +1,4 @@
+import math
 class HashTableEntry:
     """
     Hash Table entry, as a linked list node.
@@ -16,10 +17,11 @@ class HashTable:
 
     Implement this.
     """
-    def __init__(self, capacity):
+    def __init__(self, capacity, min_capacity=None):
         self.capacity = capacity
         self.storage = [None] * capacity
         self.size = 0
+        self.min_capacity = min_capacity if min_capacity else 8
        
         
 
@@ -89,11 +91,11 @@ class HashTable:
         if current is None:
             self.storage[index] = HashTableEntry(key, value)
             self.size += 1
-            load_factor = self.size/len(self.storage) 
-            print('xxxLOADxxx',load_factor)
+            load_factor = self.size/self.capacity 
+            # print('xxxLOADxxx',load_factor)
             if load_factor > 0.7:
-                self.resize(2)
-                print('xxxLOADxxx',load_factor)   
+                self.resize(self.capacity*2)
+                # print('xxxLOADxxx',load_factor)   
             return
         if current.key == key:
             current.value = value
@@ -102,11 +104,11 @@ class HashTable:
             if current.next is None:
                 current.next = HashTableEntry(key, value)
                 self.size += 1
-                load_factor = self.size/len(self.storage) 
-                print('xxxLOADxxx',load_factor)
+                load_factor = self.size/self.capacity 
+                # print('xxxLOADxxx',load_factor)
                 if load_factor > 0.7:
-                    self.resize(2)
-                    print('xxxLOADxxx',load_factor)
+                    self.resize(self.capacity*2)
+                    # print('xxxLOADxxx',load_factor)
                 return
             current = current.next
             if current.key == key:
@@ -139,8 +141,7 @@ class HashTable:
         index = self.hash_index(key)
         current = self.storage[index]
 
-
-        if current is None:
+        if current is None or self.size == 0:
             return None
 
         if current.next is None:
@@ -148,6 +149,13 @@ class HashTable:
                 deleted_val = current.value
                 self.storage[index] = None
                 self.size -= 1
+                load_factor = self.size/self.capacity
+                print('xxxLOADxxx',load_factor)
+                if load_factor < 0.2 and self.capacity > 8:
+                    half = load_factor//2
+                    print('xxxHALFxxx',half)
+                    self.resize(half)
+                    print('xxxLOADxxx',load_factor)   
                 return deleted_val
             else:
                 return None    
@@ -159,7 +167,15 @@ class HashTable:
             if current.key == key:
                 deleted_val = current.value
                 self.size -= 1
+                current.key = None
                 prev.next = current.next
+                load_factor = self.size/self.capacity
+                print('xxxLOADxxx',load_factor)
+                if load_factor < 0.2 and self.capacity > 8:
+                    half = math.ceil(load_factor//2)
+                    print('xxxHALFxxx',half)
+                    self.resize(half)
+                    print('xxxLOADxxx',load_factor) 
                 return deleted_val
             prev = current    
             current = current.next
@@ -201,6 +217,7 @@ class HashTable:
 
 
 
+
     def resize(self,new_capacity):
         """
         Doubles the capacity of the hash table and
@@ -208,7 +225,8 @@ class HashTable:
 
         Implement this.
         """
-        self.capacity = self.capacity*new_capacity
+        self.capacity = new_capacity
+        self.capacity = max((self.capacity),8)
         new_storage = [None]*self.capacity
         for node in self.storage:
             if node != None:
