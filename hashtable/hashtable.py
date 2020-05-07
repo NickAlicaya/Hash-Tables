@@ -78,10 +78,7 @@ class HashTable:
         if current is None:
             self.storage[index] = HashTableEntry(key, value)
             self.size += 1
-            load_factor = self.size/self.capacity 
-            
-            if load_factor > 0.7:
-                self.resize(self.capacity*2)
+            self.adjust_load_factor()
             return
         if current.key == key:
             current.value = value
@@ -90,9 +87,7 @@ class HashTable:
             if current.next is None:
                 current.next = HashTableEntry(key, value)
                 self.size += 1
-                load_factor = self.size/self.capacity 
-                if load_factor > 0.7:
-                    self.resize(self.capacity*2)
+                self.adjust_load_factor()
                 return
             current = current.next
             if current.key == key:
@@ -126,11 +121,7 @@ class HashTable:
                 deleted_val = current.value
                 self.storage[index] = None
                 self.size -= 1
-                load_factor = self.size/self.capacity
-               
-                if load_factor < 0.2 and self.capacity > 8:
-                    half = load_factor//2
-                    self.resize(half)
+                self.adjust_load_factor()
                 return deleted_val
             else:
                 return None    
@@ -144,11 +135,7 @@ class HashTable:
                 self.size -= 1
                 current.key = None
                 prev.next = current.next
-                load_factor = self.size/self.capacity
-               
-                if load_factor < 0.2 and self.capacity > 8:
-                    half = load_factor//2
-                    self.resize(load_factor//2)
+                self.adjust_load_factor()
                 return deleted_val
             prev = current    
             current = current.next
@@ -180,6 +167,19 @@ class HashTable:
                 return None
             current = current.next
         return current.value
+
+
+    def adjust_load_factor(self):
+        load_factor = self.size/self.capacity
+        if load_factor > 0.7:
+            self.resize(self.capacity*2)
+
+        elif load_factor < 0.2 and self.capacity > 8:
+            half = load_factor//2
+            self.resize(load_factor//2)
+                    
+
+
 
     def resize(self,new_capacity):
         """
