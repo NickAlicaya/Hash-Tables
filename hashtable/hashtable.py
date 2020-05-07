@@ -7,8 +7,8 @@ class HashTableEntry:
         self.key = key
         self.value = value
         self.next = None
-
-
+        self.head = None
+      
 class HashTable:
     """
     A hash table that with `capacity` buckets
@@ -16,12 +16,13 @@ class HashTable:
 
     Implement this.
     """
+   
     def __init__(self, capacity):
         self.capacity = capacity
         self.storage = [None] * capacity
         self.size = 0
-        
-
+      
+    
     def fnv1(self, key):
         """
         FNV-1 64-bit hash function
@@ -67,20 +68,36 @@ class HashTable:
             Put()
             Find the hash index
             Search the list for the key
+
             If it's there, replace the value
             If it's not, append a new record to the list
         """
-        if self.size == self.capacity:
-            return
-
         index = self.hash_index(key)
-        # self.storage[index] = (key,value)
-        # self.size += 1
-        cur = self.storage[index]
-        cur = head
-        while cur is not None and cur.key is not key:
-            last = cur
-            cur = last.next
+        current = self.storage[index]
+        
+        if current is None:
+            self.storage[index] = HashTableEntry(key, value)
+            self.size += 1
+            load_factor = self.size/self.capacity 
+            
+            if load_factor > 0.7:
+                self.resize(self.capacity*2)
+            return
+        if current.key == key:
+            current.value = value
+            return    
+        while current.key != key:
+            if current.next is None:
+                current.next = HashTableEntry(key, value)
+                self.size += 1
+                load_factor = self.size/self.capacity 
+                if load_factor > 0.7:
+                    self.resize(self.capacity*2)
+                return
+            current = current.next
+            if current.key == key:
+                current.value = value  
+                return
 
 
     def delete(self, key):
@@ -98,12 +115,46 @@ class HashTable:
             If found, delete the node from the list, (return the node or value?)
             Else return None
         """
-        if self.size > 0:
-            index = self.hash_index(key)
-            self.storage[index] = None
-            self.size -=1
-        else:
-            return    
+        index = self.hash_index(key)
+        current = self.storage[index]
+
+        if current is None or self.size == 0:
+            return None
+
+        if current.next is None:
+            if current.key == key:
+                deleted_val = current.value
+                self.storage[index] = None
+                self.size -= 1
+                load_factor = self.size/self.capacity
+               
+                if load_factor < 0.2 and self.capacity > 8:
+                    half = load_factor//2
+                    self.resize(half)
+                return deleted_val
+            else:
+                return None    
+
+        prev = None
+
+        while current:
+              
+            if current.key == key:
+                deleted_val = current.value
+                self.size -= 1
+                current.key = None
+                prev.next = current.next
+                load_factor = self.size/self.capacity
+               
+                if load_factor < 0.2 and self.capacity > 8:
+                    half = load_factor//2
+                    self.resize(load_factor//2)
+                return deleted_val
+            prev = current    
+            current = current.next
+        return None    
+
+
 
     def get(self, key):
         """
@@ -121,27 +172,31 @@ class HashTable:
             Else return None
         """
         index = self.hash_index(key)
-        if self.storage[index] != None:
-            return self.storage[index][1]
-        else:   
-            return None    
+        current = self.storage[index]
+        if current is None:
+            return None
+        while current.key !=key:
+            if current.next is None:
+                return None
+            current = current.next
+        return current.value
 
-    def resize(self):
+    def resize(self,new_capacity):
         """
         Doubles the capacity of the hash table and
         rehash all key/value pairs.
 
         Implement this.
         """
-        self.capacity *= 2
+        self.capacity = new_capacity
+        self.capacity = max((self.capacity),8)
         new_storage = [None]*self.capacity
-        for value in self.storage:
-            if value != None:
-                hashed_key=self.hash_index(value[0])
-                new_storage[hashed_key] = value
-        self.storage = new_storage
-      
-                
+        for node in self.storage:
+            if node != None:
+                hashed_key=self.hash_index(node.key)
+                new_storage[hashed_key] = node
+            self.storage = new_storage    
+         
 
 if __name__ == "__main__":
     ht = HashTable(2)
@@ -159,8 +214,8 @@ if __name__ == "__main__":
 
     # Test resizing
     old_capacity = len(ht.storage)
-    ht.resize()
-    new_capacity = len(ht.storage)
+    new_capacity = len(ht.storage)*2
+    ht.resize(new_capacity)
 
     print(f"\nResized from {old_capacity} to {new_capacity}.\n")
 
